@@ -45,12 +45,13 @@ template.innerHTML = `
     </div>
 
     <br>
-    <webaudio-knob id="knobVolume2" tooltip="Volume:%s" src="./assets/imgs/Vintage_VUMeter_2.png" sprites="50" value=1 min="0" max="100" step=1>
+    <webaudio-knob id="knobVolume2" tooltip="Volume:%s" src="./assets/imgs/Vintage_VUMeter_2.png" sprites="50" min="0" max="100" step=1>
         Volume
     </webaudio-knob>
-    <webaudio-knob id="knobVolume" tooltip="Volume:%s" src="./assets/imgs/LittlePhatty.png" sprites="100" value=1 min="0" max="1" step=0.01>
+    <webaudio-knob id="knobVolume" tooltip="Volume:%s" src="./assets/imgs/LittlePhatty.png" value="0.2" sprites="100" min="0" max="1" step=0.01>
         Volume
     </webaudio-knob>
+    
     <div id="right-button" style="float: right">
         <webaudio-knob id="knobStereo" tooltip="Balance:%s" src="./assets/imgs/bouton2.png" sprites="127" value=0   min="-1" max="1" step=0.01>
         Balance G/D
@@ -59,31 +60,31 @@ template.innerHTML = `
     </div>
     <div class="egaliseur">
         <div class="controls" style="display:flex">
-        <div style="flex:1">
-            <webaudio-knob id="knobSlider0" tooltip="db: %s" src="./assets/imgs/slider_knobman.png" width="50" height="128" sprites="30" value=0   min="-30" max="30" step="1">
-            </webaudio-knob> 
-        </div>   
-        <div style="flex:1">
-            <webaudio-knob id="knobSlider1" tooltip="db: %s" src="./assets/imgs/slider_knobman.png" width="50" height="128" sprites="30" value=0   min="-30" max="30" step="1">
-            </webaudio-knob> 
-            </div>
             <div style="flex:1">
-            <webaudio-knob id="knobSlider2" tooltip="db: %s" src="./assets/imgs/slider_knobman.png" width="50" height="128" sprites="30" value=0   min="-30" max="30" step="1">
-            </webaudio-knob> 
-            </div>
+                <webaudio-knob id="knobSlider0" tooltip="db: %s" src="./assets/imgs/slider_knobman.png" width="50" height="128" sprites="30" value=0   min="-30" max="30" step="1">
+                </webaudio-knob> 
+            </div>   
             <div style="flex:1">
-            <webaudio-knob id="knobSlider3" tooltip="db: %s" src="./assets/imgs/slider_knobman.png" width="50" height="128" sprites="30" value=0   min="-30" max="30" step="1">
-            </webaudio-knob> 
+                <webaudio-knob id="knobSlider1" tooltip="db: %s" src="./assets/imgs/slider_knobman.png" width="50" height="128" sprites="30" value=0   min="-30" max="30" step="1">
+                </webaudio-knob> 
+                </div>
+                <div style="flex:1">
+                <webaudio-knob id="knobSlider2" tooltip="db: %s" src="./assets/imgs/slider_knobman.png" width="50" height="128" sprites="30" value=0   min="-30" max="30" step="1">
+                </webaudio-knob> 
+                </div>
+                <div style="flex:1">
+                <webaudio-knob id="knobSlider3" tooltip="db: %s" src="./assets/imgs/slider_knobman.png" width="50" height="128" sprites="30" value=0   min="-30" max="30" step="1">
+                </webaudio-knob> 
+                </div>
+                <div style="flex:1">
+                <webaudio-knob id="knobSlider4" tooltip="db: %s" src="./assets/imgs/slider_knobman.png" width="50" height="128" sprites="30" value=0   min="-30" max="30" step="1">
+                </webaudio-knob> 
+                </div>
+                <div style="flex:1">
+                <webaudio-knob id="knobSlider5" tooltip="db: %s" src="./assets/imgs/slider_knobman.png" width="50" height="128" sprites="30" value=0   min="-30" max="30" step="1">
+                </webaudio-knob> 
+                </div>
             </div>
-            <div style="flex:1">
-            <webaudio-knob id="knobSlider4" tooltip="db: %s" src="./assets/imgs/slider_knobman.png" width="50" height="128" sprites="30" value=0   min="-30" max="30" step="1">
-            </webaudio-knob> 
-            </div>
-            <div style="flex:1">
-            <webaudio-knob id="knobSlider5" tooltip="db: %s" src="./assets/imgs/slider_knobman.png" width="50" height="128" sprites="30" value=0   min="-30" max="30" step="1">
-            </webaudio-knob> 
-            </div>
-        </div>
             <div style="display:flex">
                 <div style="flex:1">60Hz</div>
                 <div style="flex:1">170Hz</div> 
@@ -91,11 +92,11 @@ template.innerHTML = `
                 <div style="flex:1">1000Hz</div>
                 <div style="flex:1">3500Hz</div>
                 <div style="flex:1">10000Hz</div>
+            </div>
         </div>
+
+        <canvas id="myCanvas" width=300 height=150></canvas>
     </div>
-
-    <canvas id="myCanvas" width=300 height=150></canvas>
-
   </div>
         `;
         //Volume: 0 <input type="range" min=0 max=1 step=0.1 id="volume"> 1
@@ -104,9 +105,14 @@ class MyAudioPlayer extends HTMLElement {
     constructor() {
         super();
         this.src = this.getAttribute("src");
-        this.volume = 1;
         this.filters = [];
 
+        if (this.getAttribute("volume")!=null) {
+            this.volume = this.getAttribute("volume");
+        } else {
+            this.volume=0.6;
+        }
+        
         this.attachShadow({ mode: "open" });
         //this.shadowRoot.innerHTML = template;
         this.shadowRoot.appendChild(template.content.cloneNode(true));
@@ -211,7 +217,7 @@ class MyAudioPlayer extends HTMLElement {
 
         this.average = this.getAverageVolume(this.dataArray);
         this.shadowRoot.querySelector("#knobVolume2").value = this.average;
-        console.log(this.average);
+        //console.log(this.average);
         
         // once again call the visualize function at 60 frames/s
         requestAnimationFrame(() => { this.visualizeFrequence() });
@@ -221,7 +227,7 @@ class MyAudioPlayer extends HTMLElement {
     visualize() {
         this.average = this.getAverageVolume(this.dataArray);
         this.shadowRoot.querySelector("#knobVolume2").value = this.average;
-        console.log(this.average);
+        //console.log(this.average);
 
         // 1 - clear the canvas
         this.canvasContext.clearRect(0, 0, this.width, this.height);
@@ -272,16 +278,20 @@ class MyAudioPlayer extends HTMLElement {
         webaudioControls.forEach((e) => {
             let currentImagePath = e.getAttribute('src');
             if (currentImagePath !== undefined) {
-                //console.log("Got wc src as " + e.getAttribute("src"));
                 let imagePath = e.getAttribute('src');
                 //e.setAttribute('src', this.basePath  + "/" + imagePath);
                 e.src = this.basePath + "/" + imagePath;
-                //console.log("After fix : wc src as " + e.getAttribute("src"));
             }
         });
     }
 
     declareListeners() {
+        this.shadowRoot
+        .querySelector("#myPlayer")
+        .addEventListener("loadeddata", (event) => {
+            this.setVolumeStart(this.volume);
+        });    
+        
         this.shadowRoot
         .querySelector("#myPlayer")
         .addEventListener("loadeddata", (event) => {
@@ -308,13 +318,6 @@ class MyAudioPlayer extends HTMLElement {
             .addEventListener("input", (event) => {
                 this.setVolume(event.target.value);
             });
-        /*
-        this.shadowRoot
-            .querySelector("#volume")
-            .addEventListener("input", (event) => {
-                this.setVolume(event.target.value);
-            });
-        */
         this.shadowRoot
             .querySelector("#knobStereo")
             .addEventListener("input", (event) => {
@@ -376,9 +379,11 @@ class MyAudioPlayer extends HTMLElement {
     setVolume(val) {
         this.player.volume = val;
     }
+    setVolumeStart(val) {
+        this.shadowRoot.querySelector("#knobVolume").value = val;
+    }
 
     setSwitch(button){
-        console.log(button);
         if(button==1){
             this.visualizeFrequence();
         } else {
